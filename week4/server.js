@@ -1,6 +1,7 @@
 require("dotenv").config()
 const http = require("http")
 const AppDataSource = require("./db")
+const errHandle =require('./errorHandle');
 
 function isUndefined (value) {
   return value === undefined
@@ -38,12 +39,13 @@ const requestListener = async (req, res) => {
       }))
       res.end()
     } catch (error) {
-      res.writeHead(500, headers)
+      errHandle(res);
+      /* res.writeHead(500, headers)
       res.write(JSON.stringify({
         status: "error",
         message: "伺服器錯誤"
       }))
-      res.end()
+      res.end() */
     }
   } else if (req.url === "/api/credit-package" && req.method === "POST") {
     req.on("end", async () => {
@@ -90,13 +92,7 @@ const requestListener = async (req, res) => {
         }))
         res.end()
       } catch (error) {
-        console.error(error)
-        res.writeHead(500, headers)
-        res.write(JSON.stringify({
-          status: "error",
-          message: "伺服器錯誤"
-        }))
-        res.end()
+        errHandle(res);
       }
     })
   } else if (req.url.startsWith("/api/credit-package/") && req.method === "DELETE") {
@@ -127,32 +123,21 @@ const requestListener = async (req, res) => {
       }))
       res.end()
     } catch (error) {
-      console.error(error)
-      res.writeHead(500, headers)
-      res.write(JSON.stringify({
-        status: "error",
-        message: "伺服器錯誤"
-      }))
-      res.end()
+      errHandle(res);
     }
   } else if(req.url === "/api/coaches/skill" && req.method === "GET"){
     try {
-      const packages = await AppDataSource.getRepository("Skill").find({
+      const skills = await AppDataSource.getRepository("Skill").find({
         select: ["id", "name"]
       })
       res.writeHead(200, headers)
       res.write(JSON.stringify({
         status: "success",
-        data: packages
+        data: skills
       }))
       res.end()
     } catch (error) {
-      res.writeHead(500, headers)
-      res.write(JSON.stringify({
-        status: "error",
-        message: "伺服器錯誤"
-      }))
-      res.end()
+      errHandle(res);
     }
   }else if (req.url === "/api/coaches/skill" && req.method === "POST") {
     req.on("end", async () => {
@@ -184,10 +169,10 @@ const requestListener = async (req, res) => {
           res.end()
           return
         }
-        const newPackage = await SkillRepo.create({
-          name: data.name,
+        const newSkill = await SkillRepo.create({
+          name: data.name
         })
-        const result = await SkillRepo.save(newPackage)
+        const result = await SkillRepo.save(newSkill)
         res.writeHead(200, headers)
         res.write(JSON.stringify({
           status: "success",
@@ -195,13 +180,7 @@ const requestListener = async (req, res) => {
         }))
         res.end()
       } catch (error) {
-        console.error(error)
-        res.writeHead(500, headers)
-        res.write(JSON.stringify({
-          status: "error",
-          message: "伺服器錯誤"
-        }))
-        res.end()
+        errHandle(res);
       }
     })
   }else if(req.url.startsWith("/api/coaches/skill")&& req.method === "DELETE"){
@@ -232,13 +211,7 @@ const requestListener = async (req, res) => {
       }))
       res.end()
     } catch (error) {
-      console.error(error)
-      res.writeHead(500, headers)
-      res.write(JSON.stringify({
-        status: "error",
-        message: "伺服器錯誤"
-      }))
-      res.end()
+      errHandle(res);
     }
   }
   else if (req.method === "OPTIONS") {
